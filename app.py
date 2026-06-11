@@ -5,7 +5,7 @@ Flask Backend — PostgreSQL edition
 import requests
 import shutil
 import os
-
+import requests
 print("TESSERACT PATH:", shutil.which("tesseract"))
 print("PATH:", os.environ.get("PATH"))
 from flask import Flask, request, jsonify, send_from_directory
@@ -77,7 +77,6 @@ def get_db():
 # ===================== HELPERS =====================
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'pdf'}
-import requests
 
 def extract_text_from_image(path):
     print("OCR START")
@@ -92,7 +91,7 @@ def extract_text_from_image(path):
     with open(path, "rb") as f:
         response = requests.post(
             "https://api.ocr.space/parse/image",
-            files={"filename": f},
+            files={"file": f},   # IMPORTANT FIX HERE TOO
             data={
                 "apikey": api_key,
                 "language": "eng",
@@ -102,10 +101,11 @@ def extract_text_from_image(path):
     result = response.json()
     print("OCR RESPONSE:", result)
 
-    try:
-        return result["ParsedResults"][0]["ParsedText"]
-    except:
-        return ""
+    # SAFE parsing
+    if "ParsedResults" in result and result["ParsedResults"]:
+        return result["ParsedResults"][0].get("ParsedText", "")
+
+    return ""
 
         # Build parameterised query — PostgreSQL uses %s placeholders
         # ILIKE is PostgreSQL's case-insensitive LIKE

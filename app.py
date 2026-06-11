@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
+FRONTEND_DIR = BASE_DIR
 if not os.path.isdir(FRONTEND_DIR):
     FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
 

@@ -106,7 +106,6 @@ def extract_text_from_image(path):
         return result["ParsedResults"][0].get("ParsedText", "")
 
     return ""
-
         # Build parameterised query — PostgreSQL uses %s placeholders
         # ILIKE is PostgreSQL's case-insensitive LIKE
         conditions = ' OR '.join(

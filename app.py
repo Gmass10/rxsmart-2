@@ -2,6 +2,7 @@
 RxSmart - Smart Prescription Interpreter
 Flask Backend — PostgreSQL edition
 """
+import requests
 import shutil
 import os
 

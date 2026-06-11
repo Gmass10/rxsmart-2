@@ -2,6 +2,11 @@
 RxSmart - Smart Prescription Interpreter
 Flask Backend — PostgreSQL edition
 """
+import shutil
+import os
+
+print("TESSERACT PATH:", shutil.which("tesseract"))
+print("PATH:", os.environ.get("PATH"))
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pytesseract

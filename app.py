@@ -84,7 +84,9 @@ def extract_text_from_image(path):
         with open(path, 'rb') as f:
             response = requests.post(
                 "https://api.ocr.space/parse/image",
-                files={"file": f},
+                files = {
+    "filename": (os.path.basename(path), open(path, "rb"), "image/png")
+},
                 data={
                     "apikey": api_key,
                     "language": "eng",

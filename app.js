@@ -799,91 +799,30 @@ async function processOCR() {
     markStep(1);
     await new Promise(r => setTimeout(r, 300));
 
-    const isPdf = currentUploadedFile.type === 'application/pdf';
-    const mediaType = isPdf ? 'application/pdf' : (currentUploadedFile.type || 'image/jpeg');
+    const formData = new FormData();
+formData.append('file', currentUploadedFile);
 
-    // Build a list of all known medicine names/generics for matching context
-    const medicineNameList = MEDICINES.map(m => `${m.name} (${m.generic})`).join(', ');
+const response = await fetch('/api/upload', {
+  method: 'POST',
+  body: formData
+});
 
-    // Build content blocks — PDFs use the document type, images use image type
-    const fileContentBlock = isPdf
-      ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64Data } }
-      : { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Data } };
+if (!response.ok) {
+  const errorData = await response.json();
+  throw new Error(errorData.error || 'Upload failed');
+}
 
-    const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are a medical prescription OCR assistant. Extract ONLY the medicine names found in the prescription image.
-Return your answer as a JSON object like: {"medicines": ["MedicineName1", "MedicineName2"]}
-Use ONLY the names exactly as written in the prescription. Do NOT add any explanation, markdown, or extra text — JSON only.`,
-        messages: [{
-          role: 'user',
-          content: [
-            fileContentBlock,
-            {
-              type: 'text',
-              text: `Read this prescription carefully. Extract every medicine name you can find.
-Here is our database of known medicines for reference: ${medicineNameList}
-Return JSON only: {"medicines": [...]}`
-            }
-          ]
-        }]
-      })
-    });
+const data = await response.json();
 
-    if (!apiResponse.ok) {
-      throw new Error(`API error: ${apiResponse.status}`);
-    }
+markStep(2);
+await new Promise(r => setTimeout(r, 400));
 
-    const apiData = await apiResponse.json();
+const matchedMedicines = data.medicines || [];
 
-    // Step 3: Match extracted names against local MEDICINES DB
-    markStep(2);
-    await new Promise(r => setTimeout(r, 400));
+markStep(3);
+await new Promise(r => setTimeout(r, 500));
 
-    let extractedNames = [];
-    try {
-      const rawText = apiData.content
-        .filter(b => b.type === 'text')
-        .map(b => b.text)
-        .join('');
-      // Strip any markdown code fences just in case
-      const cleaned = rawText.replace(/```json|```/gi, '').trim();
-      const parsed = JSON.parse(cleaned);
-      extractedNames = (parsed.medicines || []).map(n => n.toLowerCase().trim());
-    } catch (parseErr) {
-      console.warn('Could not parse API response as JSON, falling back to text matching.', parseErr);
-      // Fallback: treat entire response as a blob of text
-      const rawText = apiData.content.filter(b => b.type === 'text').map(b => b.text).join(' ').toLowerCase();
-      extractedNames = MEDICINES.map(m => m.name.toLowerCase()).filter(n => rawText.includes(n.split(' ')[0]));
-    }
-
-    // Match against MEDICINES — flexible: check if any extracted name contains the medicine keyword or vice versa
-    const matchedMedicines = MEDICINES.filter(med => {
-      const medNameLower = med.name.toLowerCase();
-      const medGenericLower = med.generic.toLowerCase();
-      // Check against each extracted name
-      return extractedNames.some(extracted => {
-        // Direct containment check (both ways)
-        if (medNameLower.includes(extracted) || extracted.includes(medNameLower)) return true;
-        if (medGenericLower.includes(extracted) || extracted.includes(medGenericLower)) return true;
-        // Word-by-word: check if first significant word of medicine name appears in extracted
-        const medFirstWord = medNameLower.split(' ')[0];
-        if (medFirstWord.length > 4 && extracted.includes(medFirstWord)) return true;
-        const medGenericFirstWord = medGenericLower.split(' ')[0];
-        if (medGenericFirstWord.length > 4 && extracted.includes(medGenericFirstWord)) return true;
-        return false;
-      });
-    });
-
-    // Step 4: Show results
-    markStep(3);
-    await new Promise(r => setTimeout(r, 500));
-
-    currentResults = matchedMedicines;
+currentResults = matchedMedicines;
     setTimeout(() => showResults(matchedMedicines), 400);
 
   } catch (err) {

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RxSmart — Smart Prescription Interpreter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="#" class="nav-logo" onclick="showPage('home')">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="#0EA5E9"/>
+        <path d="M16 7v18M7 16h18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <span>RxSmart</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#" onclick="showPage('home')">Home</a></li>
+      <li><a href="#" onclick="showPage('upload')">Upload</a></li>
+      <li><a href="#" onclick="showPage('search')">Search</a></li>
+      <li><a href="#" onclick="showPage('history')">History</a></li>
+      <li><a href="#" onclick="showPage('about')">About</a></li>
+      <li>
+        <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Toggle dark mode">
+          <span id="darkIcon">🌙</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== HOME PAGE ===== -->
+<div id="page-home" class="page active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="#0EA5E9" stroke-width="2" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Trusted by 10,000+ patients
+      </div>
+      <h1 class="hero-title">Smart Prescription<br/><span class="gradient-text">Interpreter</span></h1>
+      <p class="hero-subtitle">Upload your prescription and understand your medicines easily — in English or Tamil.</p>
+      <div class="hero-actions">
+        <button class="btn-primary btn-lg" onclick="showPage('upload')">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          Upload Prescription
+        </button>
+        <button class="btn-secondary btn-lg" onclick="showPage('search')">Search Medicine</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-number">500+</span><span class="stat-label">Medicines</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-number">2 Lang</span><span class="stat-label">English & Tamil</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-number">Free</span><span class="stat-label">Forever</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="prescription-card-demo">
+        <div class="rx-header">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="#0EA5E9" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          <span>Prescription Decoded</span>
+        </div>
+        <div class="rx-item"><span class="rx-label">Medicine</span><span class="rx-value">Paracetamol 500mg</span></div>
+        <div class="rx-item"><span class="rx-label">Purpose</span><span class="rx-value">Fever &amp; Pain Relief</span></div>
+        <div class="rx-item"><span class="rx-label">Dosage</span><span class="rx-value">1 tablet after food, twice daily</span></div>
+        <div class="rx-item"><span class="rx-label">Duration</span><span class="rx-value">5 days</span></div>
+        <div class="rx-tag">✓ Safe to use as directed</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Why RxSmart</span>
+        <h2>Everything you need to understand your prescription</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon blue">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke="currentColor" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </div>
+          <h3>Instant OCR Reading</h3>
+          <p>Upload any prescription image and our AI instantly extracts all medicine names and instructions using advanced OCR technology.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          </div>
+          <h3>Tamil Translation</h3>
+          <p>All medicine explanations available in Tamil for patients who are more comfortable in their native language.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon purple">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+          </div>
+          <h3>Voice Playback</h3>
+          <p>Listen to your medicine instructions read aloud — perfect for elderly users or those with reading difficulties.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon orange">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3>Medicine Reminders</h3>
+          <p>Set smart reminders for each medicine so you never miss a dose. Get notified at the right time, every time.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon red">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <h3>PDF Report</h3>
+          <p>Download a simplified prescription report in PDF format to share with family or keep for your records.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon teal">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+          </div>
+          <h3>Prescription History</h3>
+          <p>Access all your past prescriptions in one place. Track your medication history easily and securely.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Simple Steps</span>
+        <h2>How It Works</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-icon">📷</div>
+          <h3>Upload Prescription</h3>
+          <p>Take a photo or scan your prescription and upload it to RxSmart.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-icon">🔍</div>
+          <h3>OCR Extraction</h3>
+          <p>Our system reads and extracts all medicine names and dosage instructions automatically.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-icon">💊</div>
+          <h3>Get Clear Info</h3>
+          <p>Receive detailed, plain-language explanations for each medicine — in English or Tamil.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo" onclick="showPage('home')">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+              <rect width="32" height="32" rx="8" fill="#0EA5E9"/>
+              <path d="M16 7v18M7 16h18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span>RxSmart</span>
+          </a>
+          <p>Making healthcare information accessible for every Tamil Nadu patient.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="#" onclick="showPage('home')">Home</a></li>
+            <li><a href="#" onclick="showPage('upload')">Upload Prescription</a></li>
+            <li><a href="#" onclick="showPage('search')">Search Medicine</a></li>
+            <li><a href="#" onclick="showPage('about')">About</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li>📧 support@rxsmart.in</li>
+            <li>📞 +91 98765 43210</li>
+            <li>📍 Chennai, Tamil Nadu</li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Disclaimer</h4>
+          <p class="disclaimer-text">RxSmart is for informational purposes only. Always consult your doctor or pharmacist for medical advice.</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 RxSmart. Built with ❤️ for patients in Tamil Nadu.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== UPLOAD PAGE ===== -->
+<div id="page-upload" class="page">
+  <div class="page-header">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('home')">← Back</button>
+      <h1>Upload Prescription</h1>
+      <p>Upload your prescription image and we'll decode it for you instantly.</p>
+    </div>
+  </div>
+  <div class="container upload-container">
+    <div class="upload-card" id="uploadCard">
+      <div class="drop-zone" id="dropZone" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+        <div class="drop-icon">
+          <svg width="64" height="64" fill="none" viewBox="0 0 24 24"><path stroke="#0EA5E9" stroke-width="1.5" stroke-linecap="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        </div>
+        <h3>Drag &amp; Drop your prescription</h3>
+        <p>or click below to browse files</p>
+        <p class="file-types">Supports: JPG, PNG, PDF (Max 10MB)</p>
+        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.pdf" style="display:none" onchange="handleFile(this)"/>
+        <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          Choose File
+        </button>
+      </div>
+
+      <!-- Preview area -->
+      <div class="preview-area" id="previewArea" style="display:none">
+        <img id="previewImg" src="" alt="Prescription Preview" class="preview-img"/>
+        <div class="preview-info">
+          <span id="fileName" class="file-name"></span>
+          <button class="remove-btn" onclick="removeFile()">✕ Remove</button>
+        </div>
+        <button class="btn-primary btn-process" id="processBtn" onclick="processOCR()">
+          🔍 Extract &amp; Interpret
+        </button>
+      </div>
+    </div>
+
+    <!-- OCR Loading -->
+    <div class="ocr-loading" id="ocrLoading" style="display:none">
+      <div class="ocr-animation">
+        <div class="scan-line"></div>
+        <svg width="80" height="80" fill="none" viewBox="0 0 24 24"><path stroke="#0EA5E9" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      </div>
+      <h3>Processing your prescription...</h3>
+      <div class="ocr-steps">
+        <div class="ocr-step active" id="step1">📤 Uploading image...</div>
+        <div class="ocr-step" id="step2">🔍 Running OCR scan...</div>
+        <div class="ocr-step" id="step3">💊 Matching medicines...</div>
+        <div class="ocr-step" id="step4">✅ Preparing results...</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESULTS PAGE ===== -->
+<div id="page-results" class="page">
+  <div class="page-header">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('upload')">← Upload Another</button>
+      <h1>Prescription Results</h1>
+      <p>Here's what we found in your prescription.</p>
+    </div>
+  </div>
+  <div class="container results-container">
+
+    <!-- Language toggle + actions -->
+    <div class="results-toolbar">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btnEn" onclick="setLang('en')">🇬🇧 English</button>
+        <button class="lang-btn" id="btnTa" onclick="setLang('ta')">🇮🇳 Tamil</button>
+      </div>
+      <div class="result-actions">
+        <button class="btn-icon" onclick="downloadPDF()" title="Download Report">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Report
+        </button>
+        <button class="btn-icon" onclick="setReminder()" title="Set Reminder">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Reminder
+        </button>
+        <button class="btn-icon" onclick="savePrescription()" title="Save to History">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+          Save
+        </button>
+      </div>
+    </div>
+
+    <!-- Medicine Cards Container -->
+    <div class="medicine-grid" id="medicineGrid"></div>
+
+  </div>
+</div>
+
+<!-- ===== SEARCH PAGE ===== -->
+<div id="page-search" class="page">
+  <div class="page-header">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('home')">← Back</button>
+      <h1>Search Medicine</h1>
+      <p>Look up any medicine to understand what it's used for and how to take it.</p>
+    </div>
+  </div>
+  <div class="container search-container">
+    <div class="search-box">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path stroke="#94A3B8" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="searchInput" placeholder="Type medicine name (e.g. Paracetamol, Amoxicillin)..." oninput="searchMedicine(this.value)" autocomplete="off"/>
+      <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none">✕</button>
+    </div>
+    <div class="search-tags">
+      <span class="tag" onclick="searchMedicine('Paracetamol')">Paracetamol</span>
+      <span class="tag" onclick="searchMedicine('Amoxicillin')">Amoxicillin</span>
+      <span class="tag" onclick="searchMedicine('Metformin')">Metformin</span>
+      <span class="tag" onclick="searchMedicine('Omeprazole')">Omeprazole</span>
+      <span class="tag" onclick="searchMedicine('Atorvastatin')">Atorvastatin</span>
+      <span class="tag" onclick="searchMedicine('Amlodipine')">Amlodipine</span>
+    </div>
+    <div id="searchResults" class="medicine-grid"></div>
+    <div id="searchEmpty" class="empty-state" style="display:none">
+      <div class="empty-icon">🔍</div>
+      <h3>No medicines found</h3>
+      <p>Try a different spelling or search for the generic name.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HISTORY PAGE ===== -->
+<div id="page-history" class="page">
+  <div class="page-header">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('home')">← Back</button>
+      <h1>Prescription History</h1>
+      <p>Your saved prescriptions and results.</p>
+    </div>
+  </div>
+  <div class="container">
+    <div id="historyList" class="history-list"></div>
+    <div id="historyEmpty" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No history yet</h3>
+      <p>Upload a prescription to get started. Your results will be saved here.</p>
+      <button class="btn-primary" onclick="showPage('upload')">Upload Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ABOUT PAGE ===== -->
+<div id="page-about" class="page">
+  <div class="page-header">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('home')">← Back</button>
+      <h1>About RxSmart</h1>
+      <p>Learn more about our mission and technology.</p>
+    </div>
+  </div>
+  <div class="container about-container">
+    <div class="about-section">
+      <div class="about-icon">🎯</div>
+      <h2>Project Objective</h2>
+      <p>RxSmart aims to bridge the communication gap between doctors and patients. Many patients — especially elderly individuals and those in rural areas — struggle to understand handwritten prescriptions. RxSmart translates medical jargon into plain language in both English and Tamil.</p>
+    </div>
+    <div class="about-section">
+      <div class="about-icon">⚠️</div>
+      <h2>Problem Statement</h2>
+      <p>Over 70% of patients in Tamil Nadu do not fully understand their prescriptions. This leads to incorrect dosages, missed medicines, and preventable health complications. The problem is compounded by illegible handwriting and technical medical terminology.</p>
+    </div>
+    <div class="about-section">
+      <div class="about-icon">✅</div>
+      <h2>Benefits to Patients</h2>
+      <ul class="about-list">
+        <li>Understand medicines without medical training</li>
+        <li>Reduce medication errors caused by confusion</li>
+        <li>Access information in Tamil for native speakers</li>
+        <li>Voice playback for elderly or visually impaired users</li>
+        <li>Keep a digital history of all prescriptions</li>
+        <li>Set reminders to never miss a dose</li>
+      </ul>
+    </div>
+    <div class="about-section">
+      <div class="about-icon">🛠️</div>
+      <h2>Technologies Used</h2>
+      <div class="tech-grid">
+        <div class="tech-card"><span class="tech-icon">🌐</span><span>HTML5</span></div>
+        <div class="tech-card"><span class="tech-icon">🎨</span><span>CSS3</span></div>
+        <div class="tech-card"><span class="tech-icon">⚡</span><span>JavaScript</span></div>
+        <div class="tech-card"><span class="tech-icon">🐍</span><span>Python Flask</span></div>
+        <div class="tech-card"><span class="tech-icon">🔍</span><span>Tesseract OCR</span></div>
+        <div class="tech-card"><span class="tech-icon">🐘</span><span>PostgreSQL</span></div>
+        <div class="tech-card"><span class="tech-icon">🚀</span><span>Render</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Reminder -->
+<div class="modal-overlay" id="reminderModal" onclick="closeModal('reminderModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>⏰ Set Medicine Reminder</h3>
+      <button class="modal-close" onclick="closeModal('reminderModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Medicine Name</label>
+        <select id="reminderMed" class="form-input"></select>
+      </div>
+      <div class="form-group">
+        <label>Reminder Time</label>
+        <input type="time" id="reminderTime" class="form-input" value="08:00"/>
+      </div>
+      <div class="form-group">
+        <label>Frequency</label>
+        <select id="reminderFreq" class="form-input">
+          <option>Once daily</option>
+          <option>Twice daily</option>
+          <option>Three times daily</option>
+          <option>After food only</option>
+        </select>
+      </div>
+      <button class="btn-primary full-width" onclick="saveReminder()">Save Reminder</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

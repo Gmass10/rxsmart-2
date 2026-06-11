@@ -1,20 +1,20 @@
 """
 RxSmart - Smart Prescription Interpreter
-Flask Backend — PostgreSQL + OCR.Space
+Flask Backend — PostgreSQL edition
 """
 
-import os
-import re
-import uuid
-import requests
-from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
+import pytesseract
 from PIL import Image
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import os
+import re
+import uuid
+from datetime import datetime
+from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -22,10 +22,10 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
 UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "pdf"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ===================== DB =====================
 def get_db():
@@ -47,36 +47,17 @@ def get_db():
 
 # ===================== HELPERS =====================
 def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in {
-        "png", "jpg", "jpeg", "pdf"
-    }
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ===================== OCR (OCR.SPACE) =====================
+# ===================== OCR (TESSERACT - ORIGINAL) =====================
 def extract_text_from_image(path):
-    print("OCR START")
-
-    api_key = os.environ.get("OCR_SPACE_API_KEY")
-    print("API KEY EXISTS:", bool(api_key))
-
-    if not api_key:
-        return ""
-
-    with open(path, "rb") as f:
-        response = requests.post(
-            "https://api.ocr.space/parse/image",
-            files={"filename": f},
-            data={
-                "apikey": api_key,
-                "language": "eng",
-            },
-        )
-
-    result = response.json()
-    print("OCR RESPONSE:", result)
-
     try:
-        return result["ParsedResults"][0]["ParsedText"]
-    except:
+        img = Image.open(path)
+        config = "--oem 3 --psm 6 -l eng"
+        text = pytesseract.image_to_string(img, config=config)
+        return text.strip()
+    except Exception as e:
+        print("OCR error:", e)
         return ""
 
 # ===================== MEDICINE MATCH =====================
@@ -139,7 +120,7 @@ def find_medicines_in_text(text):
 
     return found
 
-# ===================== API =====================
+# ===================== ROUTE =====================
 @app.route("/api/upload", methods=["POST"])
 def upload():
     if "file" not in request.files:
@@ -147,22 +128,23 @@ def upload():
 
     file = request.files["file"]
 
-    if not allowed_file(file.filename):
-        return jsonify({"error": "Invalid file"}), 400
+    if not file.filename:
+        return jsonify({"error": "No file selected"}), 400
 
-    ext = file.filename.rsplit(".", 1)[1]
+    if not allowed_file(file.filename):
+        return jsonify({"error": "Invalid file type"}), 400
+
+    ext = file.filename.rsplit(".", 1)[1].lower()
     filename = f"{uuid.uuid4()}.{ext}"
-    path = os.path.join(UPLOAD_FOLDER, filename)
+    path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
     file.save(path)
 
-    # OCR
     text = extract_text_from_image(path)
 
     if not text:
         return jsonify({"error": "OCR failed"}), 422
 
-    # Medicines
     meds = find_medicines_in_text(text)
 
     return jsonify({
@@ -174,7 +156,7 @@ def upload():
 
 @app.route("/api/health")
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok", "service": "RxSmart"})
 
 # ===================== RUN =====================
 if __name__ == "__main__":

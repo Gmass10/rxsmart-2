@@ -75,33 +75,35 @@ def get_db():
         return None
 
 # ===================== HELPERS =====================
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 def extract_text_from_image(path):
-    """Run Tesseract OCR on uploaded image."""
     try:
-        img = Image.open(path)
-        config = '--oem 3 --psm 6 -l eng'
-        text = pytesseract.image_to_string(img, config=config)
-        return text.strip()
+        api_key = os.environ.get("OCR_SPACE_API_KEY")
+
+        with open(path, 'rb') as f:
+            response = requests.post(
+                "https://api.ocr.space/parse/image",
+                files={"file": f},
+                data={
+                    "apikey": api_key,
+                    "language": "eng",
+                }
+            )
+
+        result = response.json()
+
+        if result.get("IsErroredOnProcessing"):
+            print(result)
+            return ""
+
+        parsed = result.get("ParsedResults", [])
+        if not parsed:
+            return ""
+
+        return parsed[0].get("ParsedText", "").strip()
+
     except Exception as e:
-        print(f"OCR error: {e}")
+        print("OCR API error:", e)
         return ""
-
-def find_medicines_in_text(text):
-    """Match OCR text against the PostgreSQL medicine table."""
-    conn = get_db()
-    if not conn:
-        return []
-
-    try:
-        cursor = conn.cursor()
-        # Extract candidate words (length > 4) from OCR text
-        words = list({w for w in re.findall(r'[a-zA-Z]+', text.lower()) if len(w) > 4})
-        if not words:
-            conn.close()
-            return []
 
         # Build parameterised query — PostgreSQL uses %s placeholders
         # ILIKE is PostgreSQL's case-insensitive LIKE

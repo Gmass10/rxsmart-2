@@ -77,36 +77,34 @@ def get_db():
 # ===================== HELPERS =====================
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'pdf'}
+import requests
+
 def extract_text_from_image(path):
+    print("OCR START")
+
+    api_key = os.environ.get("OCR_SPACE_API_KEY")
+    print("API KEY EXISTS:", bool(api_key))
+
+    if not api_key:
+        print("Missing OCR API key")
+        return ""
+
+    with open(path, "rb") as f:
+        response = requests.post(
+            "https://api.ocr.space/parse/image",
+            files={"filename": f},
+            data={
+                "apikey": api_key,
+                "language": "eng",
+            },
+        )
+
+    result = response.json()
+    print("OCR RESPONSE:", result)
+
     try:
-        api_key = os.environ.get("OCR_SPACE_API_KEY")
-
-        with open(path, 'rb') as f:
-            response = requests.post(
-                "https://api.ocr.space/parse/image",
-                files = {
-    "filename": (os.path.basename(path), open(path, "rb"), "image/png")
-},
-                data={
-                    "apikey": api_key,
-                    "language": "eng",
-                }
-            )
-
-        result = response.json()
-
-        if result.get("IsErroredOnProcessing"):
-            print(result)
-            return ""
-
-        parsed = result.get("ParsedResults", [])
-        if not parsed:
-            return ""
-
-        return parsed[0].get("ParsedText", "").strip()
-
-    except Exception as e:
-        print("OCR API error:", e)
+        return result["ParsedResults"][0]["ParsedText"]
+    except:
         return ""
 
         # Build parameterised query — PostgreSQL uses %s placeholders

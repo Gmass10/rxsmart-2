@@ -75,6 +75,8 @@ def get_db():
         return None
 
 # ===================== HELPERS =====================
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'pdf'}
 def extract_text_from_image(path):
     try:
         api_key = os.environ.get("OCR_SPACE_API_KEY")

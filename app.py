@@ -5,10 +5,12 @@ import os
 import uuid
 import requests
 import psycopg2
+import re
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from rapidfuzz import fuzz
 
 load_dotenv()
 
@@ -81,22 +83,33 @@ def find_medicines(text):
 
     matches = []
 
+    ocr_words = re.findall(r"[a-zA-Z]+", text.lower())
+
     for med in medicines:
         print("CHECKING:", med[1])
 
         medicine_name = med[1].lower().split()[0]
 
-        if medicine_name in text.lower():
-            print("MATCH FOUND:", med[1])
+        for word in ocr_words:
 
-            matches.append({
-                "id": med[0],
-                "name": med[1],
-                "generic_name": med[2],
-                "purpose": med[3],
-                "dosage": med[4],
-                "side_effects": med[5]
-            })
+            score = fuzz.ratio(word, medicine_name)
+
+            if score >= 80:
+
+                print(
+                    f"MATCH FOUND: OCR='{word}' DB='{medicine_name}' SCORE={score}"
+                )
+
+                matches.append({
+                    "id": med[0],
+                    "name": med[1],
+                    "generic_name": med[2],
+                    "purpose": med[3],
+                    "dosage": med[4],
+                    "side_effects": med[5]
+                })
+
+                break
 
     cur.close()
     conn.close()

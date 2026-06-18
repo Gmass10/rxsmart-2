@@ -859,58 +859,63 @@ function showResults(medicines) {
 
 function renderMedicineCards(medicines, containerId) {
   const grid = document.getElementById(containerId);
-  if (!medicines.length) {
-    if (containerId === 'medicineGrid') {
-      grid.innerHTML = `
-        <div class="empty-state" style="grid-column:1/-1;padding:3rem 1rem;">
-          <div class="empty-icon">🔎</div>
-          <h3>No medicines matched</h3>
-          <p>The medicines in this prescription were not found in our database.<br/>
-          Try searching for them manually on the <strong>Search</strong> page, or upload a clearer image.</p>
-          <button class="btn-primary" onclick="showPage('search')" style="margin-top:1rem;">Search Manually</button>
-        </div>`;
-    } else {
-      grid.innerHTML = '';
-    }
+
+  if (!medicines || medicines.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <h3>No medicines found</h3>
+        <p>No medicines from the database matched this prescription.</p>
+      </div>
+    `;
     return;
   }
+
   grid.innerHTML = medicines.map((med, i) => {
-    const info = med[currentLang] || med.en;
+
+    const purpose = med.purpose || "N/A";
+    const dosage = med.dosage || "N/A";
+    const sideEffects = med.side_effects || "N/A";
+    const generic = med.generic_name || "";
+
     return `
       <div class="medicine-card" style="animation-delay:${i * 0.1}s">
+
         <div class="medicine-card-header">
           <div>
             <div class="medicine-name">💊 ${med.name}</div>
-            <div class="medicine-type">${med.type}</div>
+            <div class="medicine-type">${generic}</div>
           </div>
-          <button class="medicine-voice-btn" data-text="${(med.name + '. ' + info.purpose).replace(/"/g, '&quot;')}" data-lang="${currentLang}" onclick="speak(this.dataset.text, this.dataset.lang)" title="Listen">🔊</button>
+
+          <button
+            class="medicine-voice-btn"
+            onclick="speak('${med.name}. ${purpose}', 'en')">
+            🔊
+          </button>
         </div>
+
         <div class="medicine-card-body">
+
           <div class="med-info-item">
-            <span class="med-info-label">🎯 Purpose / Uses</span>
-            <span class="med-info-value">${info.purpose}</span>
+            <span class="med-info-label">🎯 Purpose</span>
+            <span class="med-info-value">${purpose}</span>
           </div>
+
           <div class="med-info-item">
-            <span class="med-info-label">💉 Dosage Instructions</span>
-            <span class="med-info-value">${info.dosage}</span>
+            <span class="med-info-label">💉 Dosage</span>
+            <span class="med-info-value">${dosage}</span>
           </div>
+
           <div class="med-info-item">
-            <span class="med-info-label">⚠️ Precautions</span>
-            <span class="med-info-value warning">${info.precautions}</span>
+            <span class="med-info-label">⚠️ Side Effects</span>
+            <span class="med-info-value">${sideEffects}</span>
           </div>
-          <div class="med-info-item">
-            <span class="med-info-label">🔬 Common Side Effects</span>
-            <span class="med-info-value side-effects">${info.sideEffects}</span>
-          </div>
+
         </div>
-        <div class="med-card-footer">
-          ${med.tags.map(t => `<span class="med-tag">${t}</span>`).join('')}
-        </div>
+
       </div>
     `;
   }).join('');
 }
-
 // ===================== LANGUAGE TOGGLE =====================
 function setLang(lang) {
   currentLang = lang;

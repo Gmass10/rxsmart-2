@@ -65,48 +65,40 @@ def extract_text_from_image(path):
     return ""
 
 
-def find_medicines(ocr_text):
+def find_medicines(text):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, name, generic_name,
+               purpose_en, dosage_en, side_effects_en
+        FROM medicines
+    """)
+
+    medicines = cur.fetchall()
+
+    print("OCR TEXT FOR MATCHING:", text)
+    print("TOTAL MEDICINES IN DB:", len(medicines))
+
     matches = []
 
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT
-                id,
-                name,
-                generic_name,
-                purpose_en,
-                dosage_en,
-                side_effects_en
-            FROM medicines
-        """)
-        medicines = cur.fetchall()
-        text_lower = ocr_text.lower()
+    for med in medicines:
+        print("CHECKING:", med[1])  # medicine name
 
-        for med in medicines:
-            med_id = med[0]
-            name = med[1] or ""
-            generic = med[2] or ""
+        if med[1].lower() in text.lower():
+            print("MATCH FOUND:", med[1])
 
-            if (
-                name.lower() in text_lower
-                or generic.lower() in text_lower
-            ):
-                matches.append({
-                    "id": med_id,
-                    "name": name,
-                    "generic_name": generic,
-                    "purpose": med[3],
-                    "dosage": med[4],
-                    "side_effects": med[5]
-                })
+            matches.append({
+                "id": med[0],
+                "name": med[1],
+                "generic_name": med[2],
+                "purpose": med[3],
+                "dosage": med[4],
+                "side_effects": med[5]
+            })
 
-        cur.close()
-        conn.close()
-
-    except Exception as e:
-        print("DATABASE ERROR:", str(e))
+    cur.close()
+    conn.close()
 
     return matches
 

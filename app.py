@@ -1,7 +1,6 @@
 """
 RxSmart - Backend with OCR + PostgreSQL Medicine Matching
 """
-
 import os
 import uuid
 import requests
@@ -13,187 +12,169 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(**name**, static_folder=".", static_url_path="")
+app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
 # ================= CONFIG =================
-
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "pdf"}
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+
 # ================= DATABASE =================
-
 def get_db():
-return psycopg2.connect(
-os.environ.get("DATABASE_URL"),
-sslmode="require"
-)
-
-# ================= HELPERS =================
-
-def allowed_file(filename):
-return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def extract_text_from_image(path):
-print("OCR START")
-
-```
-api_key = os.environ.get("OCR_SPACE_API_KEY")
-print("API KEY EXISTS:", bool(api_key))
-
-if not api_key:
-    return ""
-
-with open(path, "rb") as f:
-    response = requests.post(
-        "https://api.ocr.space/parse/image",
-        files={"file": f},
-        data={
-            "apikey": api_key,
-            "language": "eng",
-        },
+    return psycopg2.connect(
+        os.environ.get("DATABASE_URL"),
+        sslmode="require"
     )
 
-result = response.json()
 
-print("OCR RESPONSE:", result)
+# ================= HELPERS =================
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-if result.get("IsErroredOnProcessing"):
+
+def extract_text_from_image(path):
+    print("OCR START")
+    api_key = os.environ.get("OCR_SPACE_API_KEY")
+    print("API KEY EXISTS:", bool(api_key))
+
+    if not api_key:
+        return ""
+
+    with open(path, "rb") as f:
+        response = requests.post(
+            "https://api.ocr.space/parse/image",
+            files={"file": f},
+            data={
+                "apikey": api_key,
+                "language": "eng",
+            },
+        )
+
+    result = response.json()
+    print("OCR RESPONSE:", result)
+
+    if result.get("IsErroredOnProcessing"):
+        return ""
+
+    if "ParsedResults" in result and result["ParsedResults"]:
+        return result["ParsedResults"][0].get("ParsedText", "")
+
     return ""
 
-if "ParsedResults" in result and result["ParsedResults"]:
-    return result["ParsedResults"][0].get("ParsedText", "")
-
-return ""
-```
 
 def find_medicines(ocr_text):
-matches = []
+    matches = []
 
-```
-try:
-    conn = get_db()
-    cur = conn.cursor()
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT
+                id,
+                name,
+                generic_name,
+                purpose_en,
+                dosage_en,
+                side_effects_en
+            FROM medicines
+        """)
+        medicines = cur.fetchall()
+        text_lower = ocr_text.lower()
 
-    cur.execute("""
-        SELECT
-            id,
-            name,
-            generic_name,
-            purpose_en,
-            dosage_en,
-            side_effects_en
-        FROM medicines
-    """)
+        for med in medicines:
+            med_id = med[0]
+            name = med[1] or ""
+            generic = med[2] or ""
 
-    medicines = cur.fetchall()
+            if (
+                name.lower() in text_lower
+                or generic.lower() in text_lower
+            ):
+                matches.append({
+                    "id": med_id,
+                    "name": name,
+                    "generic_name": generic,
+                    "purpose": med[3],
+                    "dosage": med[4],
+                    "side_effects": med[5]
+                })
 
-    text_lower = ocr_text.lower()
+        cur.close()
+        conn.close()
 
-    for med in medicines:
-        med_id = med[0]
-        name = med[1] or ""
-        generic = med[2] or ""
+    except Exception as e:
+        print("DATABASE ERROR:", str(e))
 
-        if (
-            name.lower() in text_lower
-            or generic.lower() in text_lower
-        ):
-            matches.append({
-                "id": med_id,
-                "name": name,
-                "generic_name": generic,
-                "purpose": med[3],
-                "dosage": med[4],
-                "side_effects": med[5]
-            })
+    return matches
 
-    cur.close()
-    conn.close()
-
-except Exception as e:
-    print("DATABASE ERROR:", str(e))
-
-return matches
-```
 
 # ================= ROUTES =================
-
 @app.route("/")
 def home():
-return send_from_directory(".", "index.html")
+    return send_from_directory(".", "index.html")
+
 
 @app.route("/api/health")
 def health():
-return jsonify({"status": "ok"})
+    return jsonify({"status": "ok"})
+
 
 @app.route("/api/upload", methods=["POST"])
 def upload():
-if "file" not in request.files:
-return jsonify({"error": "No file uploaded"}), 400
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
 
-```
-file = request.files["file"]
+    file = request.files["file"]
 
-if file.filename == "":
-    return jsonify({"error": "No file selected"}), 400
+    if file.filename == "":
+        return jsonify({"error": "No file selected"}), 400
 
-if not allowed_file(file.filename):
-    return jsonify({"error": "Invalid file type"}), 400
+    if not allowed_file(file.filename):
+        return jsonify({"error": "Invalid file type"}), 400
 
-ext = file.filename.rsplit(".", 1)[1].lower()
+    ext = file.filename.rsplit(".", 1)[1].lower()
+    filename = secure_filename(f"{uuid.uuid4()}.{ext}")
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
 
-filename = secure_filename(f"{uuid.uuid4()}.{ext}")
+    # OCR
+    ocr_text = extract_text_from_image(filepath)
+    if not ocr_text:
+        return jsonify({"error": "OCR failed"}), 422
 
-filepath = os.path.join(
-    app.config["UPLOAD_FOLDER"],
-    filename
-)
+    # Database medicine lookup
+    matched_medicines = find_medicines(ocr_text)
 
-file.save(filepath)
+    print("OCR TEXT:")
+    print(ocr_text)
+    print("MATCHED MEDICINES:")
+    print(matched_medicines)
 
-# OCR
-ocr_text = extract_text_from_image(filepath)
+    response = {
+        "success": True,
+        "raw_text": ocr_text,
+        "medicine_count": len(matched_medicines),
+        "medicines": matched_medicines
+    }
+    return jsonify(response)
 
-if not ocr_text:
-    return jsonify({"error": "OCR failed"}), 422
-
-# Database medicine lookup
-matched_medicines = find_medicines(ocr_text)
-
-print("OCR TEXT:")
-print(ocr_text)
-
-print("MATCHED MEDICINES:")
-print(matched_medicines)
-
-response = {
-    "success": True,
-    "raw_text": ocr_text,
-    "medicine_count": len(matched_medicines),
-    "medicines": matched_medicines
-}
-
-return jsonify(response)
-```
 
 # ================= ERROR HANDLERS =================
-
 @app.errorhandler(404)
 def not_found(e):
-return jsonify({"error": "Not found"}), 404
+    return jsonify({"error": "Not found"}), 404
+
 
 @app.errorhandler(500)
 def server_error(e):
-return jsonify({"error": "Server error"}), 500
+    return jsonify({"error": "Server error"}), 500
+
 
 # ================= RUN =================
-
-if **name** == "**main**":
-port = int(os.environ.get("PORT", 5000))
-app.run(host="0.0.0.0", port=port, debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
 

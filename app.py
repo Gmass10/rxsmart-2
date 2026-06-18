@@ -85,7 +85,9 @@ def find_medicines(text):
     for med in medicines:
         print("CHECKING:", med[1])  # medicine name
 
-        if med[1].lower() in text.lower():
+medicine_name = med[1].lower().split()[0]
+
+if medicine_name in text.lower():
             print("MATCH FOUND:", med[1])
 
             matches.append({

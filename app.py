@@ -64,7 +64,6 @@ def extract_text_from_image(path):
 
     return ""
 
-
 def find_medicines(text):
     conn = get_db()
     cur = conn.cursor()
@@ -83,11 +82,11 @@ def find_medicines(text):
     matches = []
 
     for med in medicines:
-        print("CHECKING:", med[1])  # medicine name
+        print("CHECKING:", med[1])
 
-medicine_name = med[1].lower().split()[0]
+        medicine_name = med[1].lower().split()[0]
 
-if medicine_name in text.lower():
+        if medicine_name in text.lower():
             print("MATCH FOUND:", med[1])
 
             matches.append({
